@@ -198,7 +198,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 # Endpoints
 # ==============================================================================
 
-@app.get("/", include_in_schema=False)
+@app.api_route("/", methods=["GET", "HEAD"], include_in_schema=False)
 async def root():
     return RedirectResponse(url="/docs", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
 
