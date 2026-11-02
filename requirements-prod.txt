@@ -1,0 +1,14 @@
+# Minimal production dependencies for exam_paper_extractor v2
+# Pinned versions from active environment
+# Excludes heavy ML dependencies: torch, ultralytics, paddlepaddle, paddleocr, paddlex
+
+fastapi==0.141.1
+uvicorn==0.54.0
+python-multipart==0.0.32
+pydantic==2.13.5
+numpy==2.3.5
+onnxruntime==1.30.0
+PyYAML==6.0.2
+pillow==12.3.0
+httpx==0.28.1
+opencv-python==5.0.0.93

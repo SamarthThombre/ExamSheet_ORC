@@ -1,0 +1,23 @@
+# Core Computer Vision & Object Detection
+ultralytics>=8.2.0          # YOLOv8 — training + inference
+opencv-python>=4.9.0        # Image processing, bounding box geometry, red divider detection
+Pillow>=10.0.0              # Image I/O fallback and conversion
+pyyaml>=6.0                 # YAML dataset and configuration parsing
+
+# Optical Character Recognition
+paddlepaddle>=3.0.0b1       # PaddlePaddle CPU runtime
+paddleocr>=2.9.0            # PP-OCRv4 English detection and recognition
+
+# Data Processing & Extraction
+pandas>=2.0.0               # DataFrames, benchmark metrics, label manifests
+numpy>=1.26.0               # Numerical arrays and image slicing
+pypdfium2>=4.30.0           # Fast multi-threaded PDF page rendering
+
+# Backend Web API
+fastapi>=0.100.0            # REST API framework
+uvicorn[standard]>=0.22.0   # Production ASGI web server
+python-multipart>=0.0.6     # Multipart form-data image upload support
+
+# Development & Testing (Optional)
+httpx>=0.24.0               # Starlette TestClient HTTP transport
+labelImg>=1.8.6             # Interactive dataset annotation GUI

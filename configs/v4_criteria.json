@@ -1,0 +1,83 @@
+{
+  "criteria": [
+    {
+      "id": 1,
+      "text": "1. Integrity: manifest verified at run time and its hash recorded; the run happens once (lock file); no code, config or model change afterwards; labels file hash recorded.",
+      "type": "integrity"
+    },
+    {
+      "id": 2,
+      "text": "2. Layout: on sheets with framing = ok, the detected layout equals the layout column on >= 95% of sheets; zero wrong-layout sheets return values anywhere in v4 (UNKNOWN is allowed).",
+      "type": "layout_framing_ok",
+      "min_layout_accuracy": 0.95,
+      "max_wrong_layout_values": 0
+    },
+    {
+      "id": 3,
+      "text": "3. Enrolment (framing = ok): tail-4 exact >= 88% per detected layout, and wrong, unflagged enrolments after batch flags <= 8% of sheets.",
+      "type": "enrolment_framing_ok",
+      "min_tail4_per_layout": 0.88,
+      "max_silent_wrong_batch": 0.08
+    },
+    {
+      "id": 4,
+      "text": "4. Grand total (framing = ok): value-only exact >= 75% (a total derived from the question cells is a suggestion and does not count as the value; suggestions are reported separately), and wrong, unflagged totals <= 6% of sheets.",
+      "type": "grand_total_framing_ok",
+      "min_exact_value_only": 0.75,
+      "max_silent_wrong": 0.06
+    },
+    {
+      "id": 5,
+      "text": "5. Question cells (framing = ok, cells not marked unreadable): exact on unflagged cells >= 93% (Format A) or >= 96% (Format B); flagged share <= 30% (A) or <= 15% (B); silent wrong cells <= 6% (A) or <= 4% (B).",
+      "type": "question_cells_framing_ok",
+      "thresholds": {
+        "Format A": {
+          "min_unflagged_exact": 0.93,
+          "max_flagged_share": 0.30,
+          "max_silent_wrong": 0.06
+        },
+        "Format B": {
+          "min_unflagged_exact": 0.96,
+          "max_flagged_share": 0.15,
+          "max_silent_wrong": 0.04
+        }
+      }
+    },
+    {
+      "id": 6,
+      "text": "6. Sum gate: at most 2 distinct sheets under AGREE with any wrong cell or total; no sheet with a derived total has sum status AGREE.",
+      "type": "sum_gate",
+      "max_distinct_erroneous_agree": 2,
+      "disallow_derived_total_agree": true
+    },
+    {
+      "id": 7,
+      "text": "7. Uncropped sheets (framing = uncropped): zero wrong-layout sheets return values; wrong, unflagged enrolments or totals <= 10% of those sheets; the shares read, UNKNOWN, PARTIAL_SHEET and rescan are reported.",
+      "type": "uncropped_sheets",
+      "max_wrong_layout_values": 0,
+      "max_silent_wrong_enrol_or_total": 0.10
+    },
+    {
+      "id": 8,
+      "text": "8. Unreadable cells: the share flagged is reported; a confident value on an unreadable cell counts as a silent wrong cell.",
+      "type": "unreadable_cells"
+    },
+    {
+      "id": 9,
+      "text": "9. Subject code: the per-sheet read is reported and not scored (the sealed runner has no declared-code option; the declared-code behaviour is covered by the API tests).",
+      "type": "subject_code"
+    },
+    {
+      "id": 10,
+      "text": "10. Latency (single-sheet endpoint, input as given, decode included): mean <= 2.5 s and P95 <= 3.5 s; job throughput is reported.",
+      "type": "latency",
+      "max_mean_s": 2.5,
+      "max_p95_s": 3.5
+    },
+    {
+      "id": 11,
+      "text": "11. Reported, not scored: AGREE share, needs-review share, rescan share, PARTIAL_SHEET share, per-layout and per-framing counts.",
+      "type": "reported_not_scored"
+    }
+  ]
+}

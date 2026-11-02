@@ -1,0 +1,115 @@
+format_id: "format_v2"
+display_name: "New Exam Cover Sheet Format (Format B)"
+version: "2.0"
+m7_rules_enabled: true
+
+layout:
+  target_width: 1600
+  nominal_aspect_ratio: 0.750   # ~3:4 scan ratio (2475x3300)
+  aspect_ratio_tolerance: 0.080 # Valid range: ~0.670 to 0.830
+
+anchors:
+  header_title:
+    roi: [0.040, 0.040, 0.600, 0.160]
+    expected_type: "boxed_title"
+
+fields:
+  enrollment_no:
+    type: "comb_cells"
+    comb_type: "orange_lines"
+    cell_count: 12
+    roi: [0.550, 0.250, 0.990, 0.410]
+    expected_prefix: "0801CA25"
+    pattern: "^0801CA25\\d{4}$"
+    roll_range: [1000, 1157]
+    reader: "ppocrv6_onnx_strip"
+
+  subject_code:
+    type: "handwritten_code"
+    single_line: true
+    roi: [0.040, 0.255, 0.490, 0.330]
+    known_codes: ["CT10718", "CT10715"]
+    expected_code: "CT10715"
+    pattern: "^[A-Z]{2}\\d{5}$"
+    reader: "ppocrv6_onnx_rec"
+    anchored_to: "enrollment_no"
+    m7_single_line_crop:
+      template_left: "ocr_v2/templates/tmpl_subj_b_left.png"
+      template_right: "ocr_v2/templates/tmpl_subj_b_right.png"
+      search_window_left: [0.18, 0.42, 0.01, 0.25]
+      search_window_right: [0.22, 0.48, 0.45, 0.76]
+      min_match_score: 0.35
+      left_offsets_px: [-8, 310, -20, 4]
+      right_offsets_px: [2, 295, -24, 10]
+      shape_pattern: "[CGO0][TI1L7]([A-Z0-9]{5})"
+      shape_grammar_prefix: "CT"
+      shape_grammar_digits: 5
+      disagree_min_conf: 0.85
+      enable_subject_code_disagrees: false
+
+  grand_total:
+    roi: "template_anchor_bottom_left_table"
+    available_ground_truth: "canonical_labels_v2.csv (145/145 labels verified)"
+    type: "numeric"
+    max_marks: 70
+    status: "active"
+    m7_rules:
+      search_window: [0.55, 0.85, 0.15, 0.65]
+      min_match_score: 0.35
+      x1_offset_px: 14
+      x2_offset_px: 360
+      y1_offset_px: -24
+      y2_offset_px: 24
+      lhs_rhs_max_diff: 2.0
+      low_conf_threshold: 0.80
+
+  question_marks:
+    status: "active"
+    row_count: 5
+    max_marks_per_question: 14.0
+    templates:
+      header: "ocr_v2/assets/tmpl_hdr_b.png"
+      grand_total: "ocr_v2/assets/tmpl_gt_b.png"
+    search_windows:
+      header: [0.35, 0.60, 0.20, 0.80]
+      grand_total: [0.55, 0.85, 0.15, 0.65]
+    thresholds:
+      header_min_val: 0.35
+      gt_min_val: 0.35
+    nominal:
+      pitch: 71.0
+      col_x1_offset: 16
+      col_x2_offset: 167
+    snapping_tolerances:
+      h_diff_min: 55
+      h_diff_max: 90
+      v_line_tol_px: 15
+      min_row_height_px: 40
+    grid_consistency:
+      enabled: true
+      max_pitch_dev_px: 25.0
+      expected_bottom_offset_px: 245.0
+      max_bottom_gap_px: 45.0
+      check_bottom_gap: false
+    hough_rotation:
+      roi: [0.35, 0.70, 0.15, 0.85]
+      max_side: 800
+      min_theta_deg: 75.0
+      max_theta_deg: 105.0
+      canny_low: 50
+      canny_high: 150
+      threshold: 105
+    m7_cell_rules:
+      crop_remedy: "none"
+      crop_pad_pct: 0.0
+      remove_border: false
+      min_batch_width: 256
+      enable_visual_stacked_fraction: false
+      enable_overmax_fraction_rule: true
+      enable_crossed_out_detector: true
+      enable_unreadable_signals: false
+      crossed_out:
+        inner_y_band: [0.20, 0.80]
+        inner_x_band: [0.10, 0.90]
+        horiz_min_ink_ratio: 0.14
+        scribble_min_ink_ratio: 0.23

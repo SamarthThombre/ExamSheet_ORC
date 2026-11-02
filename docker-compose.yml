@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  ocr-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: exam_paper_ocr_service
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=false
+      - MAX_UPLOAD_SIZE_MB=25
+      - ENABLE_LEGACY=false
+      - WORKERS=2
+      - ORT_THREADS=4
+    volumes:
+      - jobs_storage:/app/data/jobs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/ready')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  jobs_storage:

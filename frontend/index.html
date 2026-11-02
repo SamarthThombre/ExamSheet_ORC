@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam Sheet Verifier — Teacher Assistant</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Top Navigation Bar -->
+  <header class="navbar no-print">
+    <div class="nav-brand">
+      <div class="brand-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+      </div>
+      <div class="brand-info">
+        <h1 class="brand-title">Sheet Data Extractor</h1>
+        <span class="brand-subtitle">OCR v2 Teacher Verification Portal</span>
+      </div>
+    </div>
+
+    <div class="nav-controls">
+      <!-- Server Health Status Pill -->
+      <button id="serverStatusBtn" class="status-pill status-checking" title="Click to configure backend API endpoint">
+        <span class="status-dot"></span>
+        <span id="serverStatusText">Checking API...</span>
+        <span id="serverPingMs" class="ping-badge">-- ms</span>
+      </button>
+
+      <button id="btnNewBatchNav" class="btn btn-secondary" style="display: none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        New Batch
+      </button>
+
+      <button id="btnSettings" class="btn-icon" title="API Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-container">
+    
+    <!-- ========================================== -->
+    <!-- VIEW 1: NEW BATCH / SETUP                  -->
+    <!-- ========================================== -->
+    <section id="viewNewBatch" class="view-panel active no-print">
+      <div class="panel-header">
+        <h2>Start New Grading Batch</h2>
+        <p class="text-muted">Enter exam information, upload student answer cover sheets, and let OCR read roll numbers and total marks.</p>
+      </div>
+
+      <div class="form-grid">
+        <!-- Exam Details Card -->
+        <div class="card">
+          <h3 class="card-title">1. Exam Information</h3>
+          <div class="form-group">
+            <label for="inputExamName">Exam Name / Title</label>
+            <input type="text" id="inputExamName" placeholder="e.g. Mid-Term Examination 2026" value="Mid-Term Exam 2026" class="form-input" />
+          </div>
+
+          <div class="form-group">
+            <label for="inputSubjectCode">Subject Code <span class="required">*</span></label>
+            <input type="text" id="inputSubjectCode" placeholder="e.g. CS101, EC204, or CT10718" class="form-input mono uppercase" required />
+            <span class="field-hint">Declared once per batch to detect subject misfiling.</span>
+          </div>
+
+          <div class="form-group">
+            <label>Class Roster (Optional CSV)</label>
+            <div class="file-upload-box" id="rosterDropArea">
+              <input type="file" id="inputRosterFile" accept=".csv,.txt" class="file-input-hidden" />
+              <div class="upload-content">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                <div id="rosterStatusLabel">Click to select roster CSV (one roll number per row)</div>
+              </div>
+            </div>
+            <div id="rosterSummary" class="roster-badge-group" style="display:none;">
+              <span class="chip chip-info" id="rosterCountChip">0 students loaded</span>
+              <button type="button" class="btn-text-danger" id="btnClearRoster">Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sheet Upload Card -->
+        <div class="card">
+          <h3 class="card-title">2. Select Cover Sheet Images</h3>
+          <div class="drop-zone" id="sheetsDropZone">
+            <input type="file" id="inputSheetFiles" accept="image/png,image/jpeg,image/webp" multiple class="file-input-hidden" />
+            <div class="drop-zone-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+            </div>
+            <p class="drop-zone-title">Drag & drop cover sheets here</p>
+            <p class="drop-zone-subtitle">or <button type="button" class="link-btn" id="btnBrowseSheets">browse files from computer</button></p>
+            <p class="drop-zone-note" style="color: #2563eb; font-weight: 600; margin-top: 8px;">Upload a full-sheet colour image.</p>
+            <p class="drop-zone-hint">Supports PNG, JPG, JPEG, WEBP (format A & B)</p>
+          </div>
+
+          <div id="stagedFilesContainer" class="staged-files-list" style="display: none;">
+            <div class="staged-header">
+              <span id="stagedCountLabel" class="font-medium">0 sheets selected</span>
+              <button type="button" class="btn-text-danger" id="btnClearStaged">Clear All</button>
+            </div>
+            <div class="staged-thumbs-grid" id="stagedThumbs"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button id="btnStartProcessing" class="btn btn-primary btn-lg" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Start Processing Batch (<span id="btnSheetCount">0</span> Sheets)
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: PROCESSING QUEUE                   -->
+    <!-- ========================================== -->
+    <section id="viewProcessing" class="view-panel no-print">
+      <div class="panel-header">
+        <h2>Processing Cover Sheets</h2>
+        <p class="text-muted">The FastAPI OCR v2 engine is detecting combs, reading roll numbers, and extracting total marks.</p>
+      </div>
+
+      <!-- Live Overall Progress -->
+      <div class="card progress-card">
+        <div class="progress-info">
+          <div>
+            <span class="progress-title font-semibold" id="procProgressTitle">Reading sheets...</span>
+            <span class="text-muted" id="procProgressFraction">0 / 0 completed</span>
+          </div>
+          <span class="progress-percentage font-mono" id="procProgressPct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="procProgressBar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <!-- Live Cards Grid -->
+      <div class="sheet-queue-grid" id="queueGrid"></div>
+
+      <div class="action-bar">
+        <button id="btnCancelProcessing" class="btn btn-secondary">Stop Processing</button>
+        <button id="btnProceedToReview" class="btn btn-primary btn-lg" style="display: none;">
+          Proceed to Review
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 3: BATCH REVIEW & EXPORT              -->
+    <!-- ========================================== -->
+    <section id="viewReview" class="view-panel">
+      <!-- Printable Header (Visible only when printing) -->
+      <div class="print-header only-print">
+        <h2 id="printExamTitle">Exam Cover Sheet Report</h2>
+        <div class="print-meta">
+          <span><strong>Subject Code:</strong> <span id="printSubjectCode">--</span></span>
+          <span><strong>Export Date:</strong> <span id="printDate">--</span></span>
+          <span><strong>Total Records:</strong> <span id="printTotalCount">0</span></span>
+        </div>
+      </div>
+
+      <!-- Teacher Summary Banner -->
+      <div class="review-header no-print">
+        <div class="review-title-group">
+          <div class="badge-row">
+            <span class="badge badge-primary font-mono" id="revSubjectBadge">SUBJ: --</span>
+            <span class="badge badge-neutral" id="revExamBadge">EXAM: --</span>
+          </div>
+          <h2 class="mt-1">Batch Review & Verification</h2>
+        </div>
+
+        <div class="export-actions">
+          <button id="btnExportCsv" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Export CSV
+          </button>
+          <button id="btnExportBatchPdf" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            Export Batch PDF
+          </button>
+          <button id="btnPrintReport" class="btn btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Summary
+          </button>
+        </div>
+      </div>
+
+      <!-- Diagnostic Alerts (Consensus / Duplicates / Roster) -->
+      <div class="alert-container no-print" id="alertContainer">
+        <!-- Dynamically injected warning banners -->
+      </div>
+
+      <!-- Quick Count Metric Cards -->
+      <div class="metric-cards no-print">
+        <button class="metric-card active" data-filter="ALL">
+          <div class="metric-num" id="countTotal">0</div>
+          <div class="metric-label">Total Sheets</div>
+        </button>
+        <button class="metric-card metric-ok" data-filter="OK">
+          <div class="metric-num" id="countOk">0</div>
+          <div class="metric-label">Clean (OK)</div>
+        </button>
+        <button class="metric-card metric-check" data-filter="CHECK">
+          <div class="metric-num" id="countCheck">0</div>
+          <div class="metric-label">Needs Review</div>
+        </button>
+        <button class="metric-card metric-rescan" data-filter="RESCAN">
+          <div class="metric-num" id="countRescan">0</div>
+          <div class="metric-label">Rescan Recommended</div>
+        </button>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar no-print">
+        <div class="filter-chips">
+          <button class="chip-btn active" data-filter="ALL">All Sheets (<span id="chipAllCount">0</span>)</button>
+          <button class="chip-btn" data-filter="CHECK">Needs Review (<span id="chipCheckCount">0</span>)</button>
+          <button class="chip-btn" data-filter="RESCAN">Rescan Recommended (<span id="chipRescanCount">0</span>)</button>
+          <button class="chip-btn" data-filter="OK">Clean / Verified (<span id="chipOkCount">0</span>)</button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="inputSearchRoll" placeholder="Search roll number..." class="search-input mono" />
+        </div>
+      </div>
+
+      <!-- Missing Roster Collapsible Box (Optional) -->
+      <div id="missingRosterBox" class="missing-roster-card no-print" style="display: none;">
+        <div class="missing-roster-header" id="missingRosterToggle">
+          <div class="flex-align-gap">
+            <span class="badge badge-warning font-mono" id="missingRosterCount">0</span>
+            <span class="font-medium">Students missing from this batch (Present on Roster but no sheet read)</span>
+          </div>
+          <span class="toggle-arrow">▼</span>
+        </div>
+        <div class="missing-roster-body" id="missingRosterBody" style="display: none;">
+          <div class="missing-tags-grid" id="missingTagsGrid"></div>
+        </div>
+      </div>
+
+      <!-- Main Review Table -->
+      <div class="table-container">
+        <table class="review-table">
+          <thead>
+            <tr>
+              <th style="width: 45px;">#</th>
+              <th style="width: 70px;" class="no-print">Thumb</th>
+              <th style="min-width: 140px;">Roll / Enrolment</th>
+              <th style="width: 65px; text-align: center;">Q1</th>
+              <th style="width: 65px; text-align: center;">Q2</th>
+              <th style="width: 65px; text-align: center;">Q3</th>
+              <th style="width: 65px; text-align: center;">Q4</th>
+              <th style="width: 65px; text-align: center;">Q5</th>
+              <th style="min-width: 95px;">Total Marks</th>
+              <th class="no-print" style="width: 100px;">Status</th>
+              <th>Teacher Notes / Reason</th>
+              <th style="width: 110px;" class="no-print">Action</th>
+            </tr>
+          </thead>
+          <tbody id="reviewTableBody">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SHEET INSPECTOR & INLINE EDITOR     -->
+  <!-- ========================================== -->
+  <div id="inspectorModal" class="modal-overlay no-print" style="display: none;">
+    <div class="modal-dialog inspector-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 id="inspectorTitle">Sheet Inspector</h3>
+          <span class="text-muted font-mono" id="inspectorFilename">page_000001.png</span>
+        </div>
+        <button class="btn-close" id="btnCloseInspector">&times;</button>
+      </div>
+
+      <div class="modal-body inspector-body">
+        <!-- Left: Image Viewer with Overlays -->
+        <div class="inspector-viewer">
+          <div class="image-wrapper" id="imageWrapper">
+            <img id="inspectorImg" src="" alt="Exam sheet crop" />
+            <div id="overlayBoxes" class="overlay-layer"></div>
+          </div>
+          <div class="image-viewer-hint">
+            <span>Scroll / Drag to inspect alignment comb and total marks crop</span>
+          </div>
+        </div>
+
+        <!-- Right: Field Review & Correction Form -->
+        <div class="inspector-form">
+          <div class="inspector-section">
+            <h4 class="inspector-section-title">Diagnostics & Reasons</h4>
+            <div id="inspectorReasonsList" class="reasons-container">
+              <!-- Reason badges -->
+            </div>
+          </div>
+
+          <div class="inspector-section">
+            <h4 class="inspector-section-title">Verification & Corrections</h4>
+
+            <div class="field-edit-group">
+              <label for="editEnrolment">Enrolment / Roll Number</label>
+              <div class="input-with-raw">
+                <input type="text" id="editEnrolment" class="form-input mono uppercase" />
+                <div class="raw-value-hint">Raw OCR: <span id="rawEnrolmentText" class="font-mono">--</span> (<span id="confEnrolment">--%</span> conf)</div>
+              </div>
+            </div>
+
+            <div class="field-edit-group mt-3">
+              <label for="editTotalMarks">Total Marks</label>
+              <div class="input-with-raw">
+                <input type="number" id="editTotalMarks" class="form-input mono" min="0" max="100" step="0.5" />
+                <div class="raw-value-hint">Raw OCR: <span id="rawMarksText" class="font-mono">--</span></div>
+              </div>
+            </div>
+
+            <div class="field-edit-group mt-3">
+              <label>Question Marks (Q1 – Q5)</label>
+              <div class="qmarks-grid-inspector">
+                <div class="qmark-box">
+                  <span class="qmark-box-lbl">Q1</span>
+                  <input type="number" id="editQ1" class="form-input mono qmark-box-input" min="0" max="70" step="0.5" placeholder="-" />
+                  <span id="rawQ1Text" class="qmark-box-hint">--</span>
+                </div>
+                <div class="qmark-box">
+                  <span class="qmark-box-lbl">Q2</span>
+                  <input type="number" id="editQ2" class="form-input mono qmark-box-input" min="0" max="70" step="0.5" placeholder="-" />
+                  <span id="rawQ2Text" class="qmark-box-hint">--</span>
+                </div>
+                <div class="qmark-box">
+                  <span class="qmark-box-lbl">Q3</span>
+                  <input type="number" id="editQ3" class="form-input mono qmark-box-input" min="0" max="70" step="0.5" placeholder="-" />
+                  <span id="rawQ3Text" class="qmark-box-hint">--</span>
+                </div>
+                <div class="qmark-box">
+                  <span class="qmark-box-lbl">Q4</span>
+                  <input type="number" id="editQ4" class="form-input mono qmark-box-input" min="0" max="70" step="0.5" placeholder="-" />
+                  <span id="rawQ4Text" class="qmark-box-hint">--</span>
+                </div>
+                <div class="qmark-box">
+                  <span class="qmark-box-lbl">Q5</span>
+                  <input type="number" id="editQ5" class="form-input mono qmark-box-input" min="0" max="70" step="0.5" placeholder="-" />
+                  <span id="rawQ5Text" class="qmark-box-hint">--</span>
+                </div>
+              </div>
+              <div class="raw-value-hint mt-1">Sum Q1..Q5: <span id="inspectorQSum" class="font-mono font-semibold">--</span> | Agreement: <span id="inspectorSumStatus" class="font-mono">--</span></div>
+            </div>
+
+            <div class="field-edit-group mt-3">
+              <label>Detected Format</label>
+              <span id="inspectorFormatBadge" class="badge badge-neutral font-mono">Format A</span>
+            </div>
+          </div>
+
+          <div class="inspector-actions">
+            <button id="btnSaveInspector" class="btn btn-primary w-full">Save & Confirm Sheet</button>
+            <div class="nav-prev-next mt-2">
+              <button id="btnPrevSheet" class="btn btn-secondary btn-sm">&larr; Previous</button>
+              <span id="sheetNavIndex" class="font-mono text-muted text-sm">1 of 10</span>
+              <button id="btnNextSheet" class="btn btn-secondary btn-sm">Next &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: SETTINGS (API SERVER URL)           -->
+  <!-- ========================================== -->
+  <div id="settingsModal" class="modal-overlay no-print" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Backend API Server Configuration</h3>
+        <button class="btn-close" id="btnCloseSettings">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="inputApiBaseUrl">FastAPI Base URL</label>
+          <input type="url" id="inputApiBaseUrl" value="http://localhost:8000" class="form-input mono" />
+          <span class="field-hint">The root URL where uvicorn is serving the OCR backend.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="inputApiKey">API Key</label>
+          <input type="password" id="inputApiKey" value="ep_admin_master_secret_key_deploy2" class="form-input mono" placeholder="Enter API Key" />
+          <span class="field-hint">API Key passed via X-API-Key header to authenticate requests.</span>
+        </div>
+
+        <div class="server-test-result" id="serverTestResult">
+          <!-- Diagnostics display -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnTestApi" class="btn btn-secondary">Test Connection</button>
+        <button id="btnSaveSettings" class="btn btn-primary">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: EXPORT CONFIRMATION                 -->
+  <!-- ========================================== -->
+  <div id="exportConfirmModal" class="modal-overlay no-print" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Unreviewed Sheets Warning</h3>
+        <button class="btn-close" id="btnCloseExportConfirm">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="exportConfirmMessage" style="font-size: 1rem; color: var(--neutral-800); margin-bottom: 0.5rem;"></p>
+        <p class="text-muted" style="font-size: 0.85rem;">Sheets marked with Check or Rescan have not been manually verified. You can review them now or export the batch anyway.</p>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.25rem; border-top: 1px solid var(--neutral-200);">
+        <button id="btnReviewFirst" class="btn btn-secondary">Review first</button>
+        <button id="btnExportAnyway" class="btn btn-primary">Export anyway</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container no-print"></div>
+
+  <!-- Main JavaScript App -->
+  <script src="app.js"></script>
+</body>
+</html>

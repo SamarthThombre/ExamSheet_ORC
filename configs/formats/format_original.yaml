@@ -1,0 +1,131 @@
+format_id: "format_original"
+display_name: "Original Cover Sheet Format (Format A)"
+version: "2.0"
+m7_rules_enabled: true
+
+layout:
+  target_width: 1600
+  nominal_aspect_ratio: 0.707   # ~1:1.414 (ISO A4: 2480x3509)
+  aspect_ratio_tolerance: 0.080 # Valid range: ~0.627 to 0.787
+
+anchors:
+  header_logo:
+    roi: [0.050, 0.050, 0.450, 0.180]
+    expected_type: "crest_logo"
+
+fields:
+  enrollment_no:
+    type: "comb_cells"
+    comb_type: "red_lines"
+    cell_count: 12
+    roi: [0.520, 0.260, 0.985, 0.360]
+    expected_prefix: "0801CA25"
+    pattern: "^0801CA25\\d{4}$"
+    roll_range: [1000, 1157]
+    reader: "ppocrv6_onnx_strip"
+
+  subject_code:
+    type: "handwritten_code"
+    single_line: true
+    roi: [0.040, 0.280, 0.460, 0.355]
+    known_codes: ["CT10718", "CT10715"]
+    expected_code: "CT10718"
+    pattern: "^[A-Z]{2}\\d{5}$"
+    reader: "ppocrv6_onnx_rec"
+    anchored_to: "enrollment_no"
+    m7_single_line_crop:
+      template: "ocr_v2/templates/tmpl_subj_a.png"
+      search_window: [0.18, 0.44, 0.02, 0.28]
+      min_match_score: 0.35
+      x1_offset_px: 4
+      x2_offset_px: 315
+      y1_offset_px: -22
+      y2_offset_px: 10
+      shape_pattern: "[CGO0][TI1L7]([A-Z0-9]{5})"
+      shape_grammar_prefix: "CT"
+      shape_grammar_digits: 5
+      disagree_min_conf: 0.96
+      disagree_min_diff_chars: 3
+      enable_subject_code_disagrees: false
+
+  grand_total:
+    roi: "template_anchor_bottom_right"
+    type: "numeric"
+    max_marks: 70
+    status: "active"
+    m7_rules:
+      search_window: [0.70, 0.90, 0.35, 0.85]
+      min_match_score: 0.30
+      x1_offset_px: 2
+      fallback_subcrop_x_offset_px: 82
+      y1_offset_px: -6
+      y2_offset_px: 12
+      clip_border_strip_px: 4
+      clip_vertical_line_ratio: 0.65
+      clip_dark_delta: 45.0
+      clip_edge_min_pixels: 10
+      clip_inner_min_pixels: 18
+      lhs_rhs_max_diff: 2.0
+      low_conf_threshold: 0.85
+
+  question_marks:
+    status: "active"
+    row_count: 5
+    max_marks_per_question: 14.0
+    templates:
+      header: "ocr_v2/assets/tmpl_total_hdr_a.png"
+      grand_total: "ocr_v2/assets/tmpl_gt_a.png"
+    search_windows:
+      header: [1100, 1500, 1150, 1580]
+      grand_total: [0.65, 0.92, 0.35, 0.85]
+    thresholds:
+      header_min_val: 0.40
+      gt_min_val: 0.35
+    nominal:
+      pitch: 88.0
+      span_min: 350
+      span_max: 550
+      col_x1_offset: -50
+      col_x2_offset: 205
+    snapping_tolerances:
+      h_pitch_fraction: 0.25
+      v_line_tol_px: 15
+      min_row_height_px: 50
+    grid_consistency:
+      enabled: true
+      max_pitch_dev_px: 35.0
+      expected_bottom_offset_px: 0.0
+      max_bottom_gap_px: 40.0
+      require_both: true
+    hough_rotation:
+      roi: [0.35, 0.85, 0.60, 0.98]
+      max_side: 800
+      min_theta_deg: 80.0
+      max_theta_deg: 100.0
+      canny_low: 50
+      canny_high: 150
+      threshold: 80
+    m7_cell_rules:
+      crop_remedy: "border_remove_pad_4pct"
+      crop_pad_pct: 0.04
+      remove_border: true
+      min_batch_width: 256
+      enable_visual_stacked_fraction: true
+      enable_overmax_fraction_rule: true
+      enable_crossed_out_detector: true
+      enable_unreadable_signals: true
+      visual_fraction:
+        top_cy_max_frac: 0.43
+        bot_cy_min_frac: 0.64
+        max_x_align_diff_px: 22.0
+        min_y_sep_frac: 0.30
+        min_component_area: 25
+      crossed_out:
+        inner_y_band: [0.20, 0.80]
+        inner_x_band: [0.10, 0.90]
+        horiz_min_ink_ratio: 0.14
+        scribble_min_ink_ratio: 0.23
+      unreadable_signals:
+        min_contrast_std: 13.5
+        min_top2_margin: 0.20
+        min_conf_threshold: 0.60

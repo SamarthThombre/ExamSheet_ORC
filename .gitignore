@@ -1,0 +1,99 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Temporary and Upload Directories
+tmp/
+uploads/
+*.tmp
+
+# ML Training Runs & Temporary Artifacts
+runs/
+artifacts/debug_crops/
+artifacts/runs/
+
+# System Files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Large datasets, raw PDF scans, and SQLite databases
+data/
+*.db
+*.sqlite
+*.sqlite3
+server_startup.log
+
+# Large zip archives & backups
+*.zip
+*.tar.gz
+*.7z
+frontend_backup/
+
+# Historical Experiments, Trials & Benchmarks
+experiments/
+evaluation/
+new_set_output/
+results/
+artifacts/
+_cleanup_quarantine/
+
+# Scratch & Root Benchmark Outputs / Reports
+*_REPORT.md
+*_PLAN.md
+*_ASK.md
+*_LOG.md
+*_AUDIT.md
+*_METRICS.md
+DEMO_SCRIPT.md
+LIMITATIONS.md
+CHANGELOG.md
+README_annotation.md
+classes.txt
+cleaned_ocr_results.csv
+cleanup_protected_patterns.txt
+comparison_report.csv
+frozen_manifest.csv
+hash_before_v3.csv
+hash_runner_scorer.csv
+ocr_results.csv
+profile_results.json
+profile_pipeline.py
+compare_cleaned_vs_verified.py
+reconstruct_test.py
+restore_cleanup.py
+run_new_batch.py
+run_sealed_once.py
+score_sealed.py
+test_ocr.py
+text_regex_cleaning.py
+data.yaml
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Cleanup Quarantine & Regeneration Caches
+_cleanup_quarantine/
+artifacts/
+new_set_output/
+results/
+frontend/*.csv
+frontend/*.pdf
+*.lock
+

@@ -1,0 +1,3 @@
+enrolment_no
+subject_code
+grand_total

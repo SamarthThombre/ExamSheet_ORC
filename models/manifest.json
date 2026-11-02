@@ -1,0 +1,24 @@
+{
+  "version": "2.0.0",
+  "models": {
+    "models/PP-OCRv6_medium_rec_onnx/inference.onnx": {
+      "sha256": "9c09abf0957f7968c7586464b7397b84ad2387a0497a351af40e9acc71b673ba",
+      "size": 76554979
+    }
+  },
+  "configs": {
+    "ocr_v2/assets/character_dict.json": {
+      "sha256": "bf37aa18b879fe7d9b7a70112c59bf6e3e994eab8ff7b22882e3d76e485c9df1",
+      "size": 131087
+    },
+    "configs/formats/format_original.yaml": {
+      "sha256": "645a88a2cb90877134eb4b2dc3f2161475447e7dfc2c471f9f69dd01cee2822e",
+      "size": 3607
+    },
+    "configs/formats/format_v2.yaml": {
+      "sha256": "85db095871e51669e648ce59b899ddf57c8c6322d763e44c9e51cb2c84e57d06",
+      "size": 3267
+    }
+  },
+  "manifest_hash": "501db792e22164b18b0c24010de88d9de988fe2bbf72a85bf7ad03c2410ff0bf"
+}

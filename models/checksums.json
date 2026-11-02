@@ -1,0 +1,7 @@
+{
+  "models/PP-OCRv6_medium_rec_onnx/inference.onnx": {
+    "sha256": "9c09abf0957f7968c7586464b7397b84ad2387a0497a351af40e9acc71b673ba",
+    "size_bytes": 76554979,
+    "description": "PP-OCRv6 medium text recognition ONNX model"
+  }
+}

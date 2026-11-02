@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "models": {
+    "field_detector": {
+      "model_id": "yolov8n-exam-fields-v1",
+      "task": "object_detection",
+      "framework": "ultralytics",
+      "architecture": "yolov8n",
+      "weights_file": "best.pt",
+      "onnx_file": "best.onnx",
+      "base_pretrained": "yolov8n.pt",
+      "input_resolution": 1280,
+      "default_confidence_threshold": 0.30,
+      "classes": {
+        "0": "enrolment_no",
+        "1": "grand_total",
+        "2": "subject_code"
+      },
+      "class_count": 3,
+      "notes": "Trained on annotated cover-sheet dataset to localize 3 tabular fields. Missing enrolment_no boxes are handled via deterministic geometric fallback in ocr.detection.fallbacks."
+    },
+    "text_recognizer": {
+      "model_id": "pp-ocrv4-mobile-en",
+      "task": "optical_character_recognition",
+      "framework": "paddlepaddle / paddleocr",
+      "version": "PP-OCRv4",
+      "language": "en",
+      "use_angle_cls": false,
+      "runtime": "CPU",
+      "environment_guards": {
+        "FLAGS_enable_pir_api": "0",
+        "FLAGS_use_onednn": "0"
+      },
+      "notes": "PaddleOCR 3.x with dynamic Windows torch DLL isolation hook to prevent Windows WinError 127 crash."
+    }
+  }
+}

@@ -1,0 +1,61 @@
+# Caddyfile for Exam Paper Extractor Reverse Proxy with Automatic HTTPS and HSTS
+{
+    # Global options
+    admin off
+    auto_https off # Set to 'default' or remove for public domains with Let's Encrypt / ZeroSSL
+}
+
+:443, localhost:443 {
+    # TLS configuration: in production, replace with real domain (e.g. ocr.internal.university.edu)
+    tls internal
+
+    # Security Headers
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+    }
+
+    # Reverse proxy to FastAPI application backend
+    reverse_proxy localhost:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+
+        # Health check
+        health_uri /ready
+        health_interval 10s
+        health_timeout 2s
+
+        # Buffering & timeouts for OCR batches
+        transport http {
+            response_header_timeout 180s
+            dial_timeout 10s
+        }
+    }
+
+    # Block direct access to uploads directory
+    @blocked_uploads {
+        path /uploads*
+        path /static/uploads*
+        path /data*
+    }
+    respond @blocked_uploads 403 {
+        body "Access Denied"
+        close
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10MB
+            roll_keep 5
+        }
+        format json
+    }
+}
