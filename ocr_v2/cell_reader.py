@@ -7,6 +7,7 @@ Implements:
 4. Four-status sum verification (AGREE / MISMATCH / POSSIBLE_GRACE / UNAVAILABLE).
 """
 
+import os
 import math
 import json
 import re
@@ -268,12 +269,22 @@ def compute_sum_status(
         return "MISMATCH", sum_q, total_val, diff
 
 
-def get_ort_session(threads: int = 4, model_path: Optional[str] = None):
-    """Factory helper to obtain an ONNX Runtime InferenceSession for PP-OCRv6."""
+_SHARED_ORT_SESSION: Optional[Any] = None
+
+
+def get_ort_session(threads: Optional[int] = None, model_path: Optional[str] = None):
+    """Factory helper to obtain an ONNX Runtime InferenceSession for PP-OCRv6, cached as singleton to preserve RAM."""
+    global _SHARED_ORT_SESSION
+    if _SHARED_ORT_SESSION is not None and model_path is None:
+        return _SHARED_ORT_SESSION
+
     import onnxruntime as ort
+    num_threads = int(os.getenv("ORT_THREADS", str(threads if threads is not None else 1)))
     opts = ort.SessionOptions()
-    opts.intra_op_num_threads = threads
+    opts.intra_op_num_threads = num_threads
     opts.inter_op_num_threads = 1
+    opts.enable_cpu_mem_arena = False
+    opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
     opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
     if model_path is None:
         vendored = PROJECT_ROOT / "models" / "PP-OCRv6_medium_rec_onnx" / "inference.onnx"
@@ -281,7 +292,10 @@ def get_ort_session(threads: int = 4, model_path: Optional[str] = None):
             model_path = str(vendored)
         else:
             model_path = str(Path.home() / ".paddlex" / "official_models" / "PP-OCRv6_medium_rec_onnx" / "inference.onnx")
-    return ort.InferenceSession(model_path, sess_options=opts, providers=["CPUExecutionProvider"])
+    sess = ort.InferenceSession(model_path, sess_options=opts, providers=["CPUExecutionProvider"])
+    if model_path == str(PROJECT_ROOT / "models" / "PP-OCRv6_medium_rec_onnx" / "inference.onnx"):
+        _SHARED_ORT_SESSION = sess
+    return sess
 
 
 # -----------------------------------------------------------------------------

@@ -78,7 +78,7 @@ class OCRv2Pipeline:
         self.review_manager = BatchReviewManager()
         self.table_detector = DualAnchorTableDetector()
         self.cell_reader = SharedCellReader()
-        self.ort_session = get_ort_session(threads=4)
+        self.ort_session = get_ort_session()
         logger.info("OCR v2 pipeline components initialized successfully.")
 
 
@@ -697,6 +697,15 @@ def process_sheet_bytes(
         resp_dict["subject_code"]["subject_code_read"] = ocr_val
     else:
         resp_dict["subject_code"]["source"] = "ocr"
+
+    # Explicitly release buffers and trim Linux glibc heap to keep RAM < 350 MB
+    import gc
+    gc.collect()
+    try:
+        import ctypes
+        ctypes.CDLL("libc.so.6").malloc_trim(0)
+    except Exception:
+        pass
 
     return resp_dict
 
