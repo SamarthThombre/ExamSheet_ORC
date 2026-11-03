@@ -701,16 +701,16 @@ def process_sheet_bytes(
         resp_dict["subject_code"]["source"] = "ocr"
 
     # -------------------------------------------------------------------------
-    # DESKEWED WEB PREVIEW FOR BROWSER INSPECTOR
+    # DESKEWED WEB PREVIEW FOR BROWSER INSPECTOR (Ultra-compressed ~140KB JPEG)
     # -------------------------------------------------------------------------
     if align_res is not None and align_res.image is not None and align_res.image.size > 0:
         prev_h, prev_w = align_res.image.shape[:2]
-        if prev_w > 1200:
-            scale = 1200.0 / prev_w
-            prev_mat = cv2.resize(align_res.image, (1200, int(prev_h * scale)), interpolation=cv2.INTER_AREA)
+        if prev_w > 1000:
+            scale = 1000.0 / prev_w
+            prev_mat = cv2.resize(align_res.image, (1000, int(prev_h * scale)), interpolation=cv2.INTER_AREA)
         else:
             prev_mat = align_res.image
-        success, buf = cv2.imencode(".jpg", prev_mat, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        success, buf = cv2.imencode(".jpg", prev_mat, [cv2.IMWRITE_JPEG_QUALITY, 70])
         if success:
             resp_dict["image_preview"] = f"data:image/jpeg;base64,{base64.b64encode(buf).decode('ascii')}"
 
