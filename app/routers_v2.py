@@ -9,6 +9,8 @@ from dataclasses import asdict
 import time
 import logging
 import os
+import base64
+import cv2
 
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, Depends, Request, status
 import numpy as np
@@ -697,6 +699,20 @@ def process_sheet_bytes(
         resp_dict["subject_code"]["subject_code_read"] = ocr_val
     else:
         resp_dict["subject_code"]["source"] = "ocr"
+
+    # -------------------------------------------------------------------------
+    # DESKEWED WEB PREVIEW FOR BROWSER INSPECTOR
+    # -------------------------------------------------------------------------
+    if align_res is not None and align_res.image is not None and align_res.image.size > 0:
+        prev_h, prev_w = align_res.image.shape[:2]
+        if prev_w > 1200:
+            scale = 1200.0 / prev_w
+            prev_mat = cv2.resize(align_res.image, (1200, int(prev_h * scale)), interpolation=cv2.INTER_AREA)
+        else:
+            prev_mat = align_res.image
+        success, buf = cv2.imencode(".jpg", prev_mat, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        if success:
+            resp_dict["image_preview"] = f"data:image/jpeg;base64,{base64.b64encode(buf).decode('ascii')}"
 
     # Explicitly release buffers and trim Linux glibc heap to keep RAM < 350 MB
     import gc

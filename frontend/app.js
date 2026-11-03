@@ -530,21 +530,17 @@
   }
 
   /**
-   * Preprocess file for safe upload: Retains full resolution up to 4096px (preserving 300 DPI clarity),
-   * explicitly respecting EXIF orientation metadata via createImageBitmap from-image.
+   * Preprocess file for safe, efficient upload: Automatically resizes client-side
+   * to canonical pipeline resolution (maxEdge 1600px) and compresses to ~300KB JPEG.
+   * Respects EXIF orientation metadata via createImageBitmap from-image.
    */
   async function prepareImageForUpload(file) {
     return new Promise((resolve) => {
-      const maxEdge = 4096;
+      const maxEdge = 1600;
 
       const renderToJpeg = (source, naturalW, naturalH) => {
         let w = naturalW;
         let h = naturalH;
-
-        if (w <= maxEdge && h <= maxEdge && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-          resolve(file);
-          return;
-        }
 
         if (w > maxEdge || h > maxEdge) {
           if (w > h) {
@@ -560,6 +556,8 @@
         canvas.width = w;
         canvas.height = h;
         const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(source, 0, 0, w, h);
 
         canvas.toBlob((blob) => {
@@ -569,7 +567,7 @@
           }
           const resizedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
           resolve(resizedFile);
-        }, 'image/jpeg', 0.95);
+        }, 'image/jpeg', 0.85);
       };
 
       if (typeof createImageBitmap === 'function') {
@@ -702,6 +700,9 @@
         item.subject_code = data.subject_code || {};
         item.total_marks = data.total_marks || {};
         item.rescan_recommended = Boolean(data.rescan_recommended);
+        if (data.image_preview) {
+          item.thumbUrl = data.image_preview;
+        }
 
         item.final_enrolment = (item.enrolment.value || '').toUpperCase();
         item.final_total_marks = (item.total_marks.value !== undefined && item.total_marks.value !== null) ? item.total_marks.value : '';
@@ -1183,6 +1184,9 @@
         sheet.subject_code = data.subject_code || {};
         sheet.total_marks = data.total_marks || {};
         sheet.rescan_recommended = Boolean(data.rescan_recommended);
+        if (data.image_preview) {
+          sheet.thumbUrl = data.image_preview;
+        }
 
         const hasEnrolVal = Boolean(sheet.enrolment && sheet.enrolment.value);
         const hasTotalVal = Boolean(sheet.total_marks && sheet.total_marks.value !== null && sheet.total_marks.value !== undefined);
